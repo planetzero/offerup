@@ -7,6 +7,7 @@
 const tress = require('tress');
 const request = require('request');
 const NodeGeocoder = require('node-geocoder');
+const cheerio = require('cheerio');
 
 
 /**
