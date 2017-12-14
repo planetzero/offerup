@@ -1,0 +1,28 @@
+{
+  "name": "offerup",
+  "version": "1.0.0",
+  "description": "OfferUp Search",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaksymBlank/offerup.git"
+  },
+  "keywords": [
+    "OfferUp",
+    "Search"
+  ],
+  "author": "Maksym Blank <blank.maksym@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaksymBlank/offerup/issues"
+  },
+  "homepage": "https://github.com/MaksymBlank/offerup#readme",
+  "dependencies": {
+    "node-geocoder": "^3.21.1",
+    "request": "^2.83.0",
+    "tress": "^1.0.5"
+  }
+}
