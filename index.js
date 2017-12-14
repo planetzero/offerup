@@ -10,6 +10,8 @@ const NodeGeocoder = require('node-geocoder');
 const cheerio = require('cheerio');
 
 
+
+
 /**
    * Gets latitude and longitude by location name
    *
@@ -69,9 +71,10 @@ function _getLocation(location){
  * Сlears text from spaces and 'option'
  * @param {String/Array} text 
  * @param {Object} option 
+ * @param {String} replace
  */
 
-function _clear(text, option){
+function _clear(text, option, replace){
     if(!text){
         return '';
     }
@@ -80,7 +83,11 @@ function _clear(text, option){
     }
     if(option){
         if(typeof option == 'string'){
-            text = text.replace(option, '');
+            if(replace){
+                text = text.replace(option, replace);
+            }else{
+                text = text.replace(option, '');
+            }
         }
         /**
          * Multiple options
@@ -100,9 +107,70 @@ function _clear(text, option){
 }
 
 /**
+   * Gets item information by Item ID
+   *
+   * @param {String} id item ID
+   * @param {Function} resolve Callback success
+   * @param {Function} reject Callback error
+   * 
+   */
+function getItemInformation(id, resolve, reject){
+    if(!id){
+        reject(new Error('id is not defined'));
+    }
+    if(!(typeof id == 'string')){
+        reject(new Error('id should be string'));
+    }
+    id = +id;
+    if(!(typeof id == 'number')){
+        reject(new Error('id is not found'));
+    }
+    var url = 'https://offerup.com/item/detail/' + id + '/';
+    request({
+        url: url
+    }, function(error, response){
+        if(!error && response.statusCode == 200){
+            var $ = cheerio.load(response.body, {
+                normalizeWhitespace: true
+            });
+            var title_box = $('.box-main-alt').children().eq(2).children().eq(1).children();
+            var desc_box = $('.box-main-alt').children().eq(4).find('div');
+
+            resolve({
+                success: "success",
+                data: {
+                    title: title_box.eq(0).html(),
+                    location: title_box.eq(1).children().last().html(),
+                    posted_ago: _clear(title_box.eq(2).html(), '&#xA0;', ' '),
+                    description: ((desc_box.eq(3).text())) ? _clear(desc_box.eq(1).html()) : '',
+                    condition: ((desc_box.eq(3).text())) ? _clear(desc_box.eq(3).html()) : _clear(desc_box.eq(1).html()),
+                    price: _clear($('.size-large-xx').html()),
+                    owner: {
+                        id: _clear($('#profile_pic').children().eq(0).attr('href'), ['https://offerup.com/p/', '/']),
+                        name: _clear($('#profile_pic').children().eq(1).html())
+                    }
+                }
+            });
+
+        }else{
+            if(!error && response.statusCode == 404){
+                resolve({
+                    success: "warning",
+                    data: {
+                        message: "item is not found"
+                    }
+                });
+            }else{
+                reject(new Error(error));
+            }
+        }
+    })
+}
+
+/**
    * Gets user profile information by UserID
    *
-   * @param {Object} id User ID
+   * @param {String} id User ID
    * @param {Function} resolve Callback success
    * @param {Function} reject Callback error
    * 
@@ -165,10 +233,21 @@ function getUserProfile(id, resolve, reject){
                 callback();
 
             }else{
-                reject(new Error(error));
+                if(!error && response.statusCode == 404){
+                    callback(new Error('not found'))
+                }
             }
         });
     });
+
+    q.error = function(err) {
+        resolve({
+            success: "warning",
+            data: {
+                message: "User is not found"
+            }
+        });
+    };
 
     q.drain = function(){
         /**
@@ -302,18 +381,38 @@ function getFullListByQuery(query, location, resolve, reject){
         this.googleApi = apikey;
     }
 
+     /**
+     * Allows you to get item information by Item ID
+     *
+     * @param  {String}  id  Item ID
+     * 
+    */
+    OfferUp.getItemInformation = function(id){
+        return new Promise(function(resolve, reject){
+            if(!id){
+                reject(new Error('\'id\' is not defined'));
+            }
+            if(!(typeof id == 'string')){
+                reject(new Error('\'id\' should be \'string\''));
+            }
+            getItemInformation(id, resolve, reject);
+        });
+    }
 
     /**
-     * Allows you get user information by UserID
+     * Allows you to get user information by UserID
      *
-     * @param  {String}  id UserID
+     * @param  {String}  id  UserID
      * 
     */
 
     OfferUp.getUserProfile = function(id){
         return new Promise(function(resolve, reject){
             if(!id){
-                reject('\'id\' is not defined');
+                reject(new Error('\'id\' is not defined'));
+            }
+            if(!(typeof id == 'string')){
+                reject(new Error('\'id\' should be \'string\''));
             }
             getUserProfile(id, resolve, reject);
         });

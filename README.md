@@ -45,7 +45,7 @@ offerup.getFullListByQuery({
                                     ...
                                 },
                             "id": 391663263,
-                            "title": "Looking to buy iPod 6 or any iPhone",
+                            "title": "Iphone 6S",
                             "post_date_ago": "13 minutes",
                             "location_name": "Joliet, IL"
                         }
@@ -64,7 +64,7 @@ offerup.getFullListByQuery({
 
 ## Methods
 
-### setGoogleMapApi()
+### setGoogleMapApi('api_key')
 
 >https://developers.google.com/maps/
 
@@ -86,9 +86,9 @@ offerup.setDefaults({
 });
 ```
 
-### getUserProfile()
+### getUserProfile('user_id')
 
-Allows you get user information by user ID
+Allows you to get user information by user ID
 
 ```js
 offerup.getUserProfile('112390').then(function(response){
@@ -118,6 +118,38 @@ offerup.getUserProfile('112390').then(function(response){
                     } 
                 }
             */
+    }
+}, function error(response){
+    console.log(response);
+});
+```
+
+### getItemInformation('item_id')
+
+Allows you to get item information by item ID
+
+```js
+offerup.getItemInformation('393936205').then(function success(response){
+    if(response && response.success == 'success'){
+        console.log(response.data);
+        /*
+            Output
+            {
+                success: "success",
+                data: { 
+                    title: 'Data Recovery Services',
+                    location: 'Decatur, GA',
+                    posted_ago: 'Posted 3 hours ago',
+                    description: 'Great condition hardly used has all pieces.',
+                    condition: 'New (never used)',
+                    price: '20',
+                    owner: { 
+                        id: '34629542', 
+                        name: 'ProTech4O42876497' 
+                    }
+                }
+            }
+        */
     }
 }, function error(response){
     console.log(response);
