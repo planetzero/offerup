@@ -64,9 +64,128 @@ function _getLocation(location){
         });
     });
 }
+/**
+ * Сlears text from spaces and 'option'
+ * @param {String/Array} text 
+ * @param {Object} option 
+ */
+
+function _clear(text, option){
+    if(!text){
+        return '';
+    }
+    if(!(typeof text == 'string')){
+        text = text.toString();
+    }
+    if(option){
+        if(typeof option == 'string'){
+            text = text.replace(option, '');
+        }
+        /**
+         * Multiple options
+         */
+        if(Array.isArray(option)){
+            for(var i=0;i<option.length;i++){
+                text = text.replace(option[i], '');
+            }
+        }
+        
+    }
+    text = text.replace(/\s\s+/g, ' ');
+    text = text.replace(/\n/g, '');
+    text = text.replace(/^\s/g, '');
+    text = text.replace(/\s$/g, '');
+    return text;
+}
 
 /**
-   * Gets latitude and longitude by location name
+   * Gets user profile information by UserID
+   *
+   * @param {Object} id User ID
+   * @param {Function} resolve Callback success
+   * @param {Function} reject Callback error
+   * 
+   */
+
+function getUserProfile(id, resolve, reject){
+    var page = 1;
+    var index = 0;
+    var result = {};
+    var items = [];
+    var q = tress(function(URL, callback){
+        request({
+            url: URL
+        }, function(error, response){
+            if(!error && response.statusCode == 200){
+                var $ = cheerio.load(response.body, {
+                    normalizeWhitespace: true
+                });
+                var userInfo = $('.box-sidebar').eq(0);
+                var type = userInfo.find('.header').text(); // SELLER
+                var name = (userInfo.find('div').eq(1).children().eq(0).children().last().attr('itemprop') == 'name') ? userInfo.find('div').eq(1).children().eq(0).children().last().text() : ''; // name
+                var member_since = userInfo.find('div').eq(1).children().eq(1).text() || ''; // member_since
+                var reviews = (userInfo.find('div').eq(1).children().eq(2).children().last().children().eq(0).children().attr('itemprop') == 'ratingCount') ? userInfo.find('div').eq(1).children().eq(2).children().last().children().eq(0).children().text() : '0';
+                var location = $('.box-sidebar').eq(1).find('.header').text();
+                var followers = $('.box-sidebar').eq(2).find('.header').find('a').html();
+                var items_array = $('#item-collection-profile-list').children().children();
+                /**
+                 * if there are more than 24 items on user's account, loads another page
+                 */
+                if(items_array.length > 0){
+                    for(var i=0;i<items_array.length;i++){
+                        index++;
+                        items.push({
+                            id: _clear(items_array.eq(i).find('.item_listing_id').val()),
+                            title: _clear(items_array.eq(i).find('.item-info-title').children().html()),
+                            img_src: _clear(items_array.eq(i).find('.item-pic').children().children().attr('src')),
+                            price: _clear(items_array.eq(i).find('.item-info-price').html(), '$'),
+                            location: _clear(items_array.eq(i).find('.item-info-distance').text()),
+                            link: _clear(items_array.eq(i).find('.item-pic').children().attr('href'), '?ref=UserProfile')
+                        });
+                    }
+                    page++;
+                    q.push('https://offerup.com/p/' + id + '/?type=profile-list&page=' + page);
+                }
+
+
+                if(!member_since || !(RegExp('Member Since').test(member_since))){
+                    member_since = '';
+                }
+                result = {
+                    type: _clear(type),
+                    name: _clear(name),
+                    member_since: _clear(member_since, 'Member Since '),
+                    reviews: _clear(reviews),
+                    location: _clear(location),
+                    followers: _clear(followers, ['(', ')']),
+                };
+
+                
+                callback();
+
+            }else{
+                reject(new Error(error));
+            }
+        });
+    });
+
+    q.drain = function(){
+        /**
+         * Resolve promise
+         */
+        var data = Object.assign(result, {
+            items: items
+        });
+        resolve({success: 'success', data: data});
+    }
+
+    var url = 'https://offerup.com/p/' + id + '/?type=profile-list&page=' + page;
+    q.push(url);
+}
+
+
+/**
+   * Gets items list by query
    *
    * @param {Object} query Query object
    * @param  {Object}  location  latitude and longitude object
@@ -180,6 +299,23 @@ function getFullListByQuery(query, location, resolve, reject){
             reject(new Error('\'API Key\' should be \'string\''));
         }
         this.googleApi = apikey;
+    }
+
+
+    /**
+     * Allows you get user information by UserID
+     *
+     * @param  {String}  id UserID
+     * 
+    */
+
+    OfferUp.getUserProfile = function(id){
+        return new Promise(function(resolve, reject){
+            if(!id){
+                reject('\'id\' is not defined');
+            }
+            getUserProfile(id, resolve, reject);
+        });
     }
 
     /**

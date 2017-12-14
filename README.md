@@ -85,3 +85,41 @@ offerup.setDefaults({
     price_max: 1000
 });
 ```
+
+### getUserProfile()
+
+Allows you get user information by user ID
+
+```js
+offerup.getUserProfile('112390').then(function(response){
+    if(response && response.success == 'success'){
+        console.log(response.data);
+        /*
+        Output
+            { 
+                success: 'success',
+                data: { 
+                        type: 'SELLER',
+                        name: 'calvin',
+                        member_since: 'March, 2014',
+                        reviews: '1',
+                        location: 'VANCOUVER, WA',
+                        followers: '8',
+                        items: [
+                            { 
+                                id: '392556488',
+                                title: 'Shirt',
+                                img_src: 'https://d2j6tswx2otu6e.cloudfront.net/0qdf73oL5yfun8RBLcnUyoj2upY=/200x267/d2c0/d2c0a133a6194e9da25266a8165c4e2a.jpg',
+                                price: '5.00',
+                                location: 'Elizabethton, TN',
+                                link: 'https://offerup.com/item/detail/392556488/' 
+                            }
+                        ] 
+                    } 
+                }
+            */
+    }
+}, function error(response){
+    console.log(response);
+});
+```

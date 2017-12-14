@@ -1,7 +1,7 @@
 {
   "name": "offerup",
-  "version": "1.0.0",
-  "description": "OfferUp Search",
+  "version": "1.0.1",
+  "description": "The unofficial OfferUp API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +12,10 @@
   },
   "keywords": [
     "OfferUp",
-    "Search"
+    "Search",
+    "API",
+    "MarketPlace",
+    "Sell goods"
   ],
   "author": "Maksym Blank <blank.maksym@gmail.com>",
   "license": "ISC",
