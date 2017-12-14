@@ -24,5 +24,8 @@
     "node-geocoder": "^3.21.1",
     "request": "^2.83.0",
     "tress": "^1.0.5"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }
