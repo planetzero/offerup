@@ -1,6 +1,6 @@
 {
   "name": "offerup",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The unofficial OfferUp API",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,8 @@
   "dependencies": {
     "node-geocoder": "^3.21.1",
     "request": "^2.83.0",
-    "tress": "^1.0.5"
+    "tress": "^1.0.5",
+    "cheerio": "^0.22.0"
   },
   "directories": {
     "doc": "docs"
